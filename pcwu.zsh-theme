@@ -12,8 +12,7 @@
 
 local prefix="%{$fg_bold[white]%}▲"
 local dir="%{$fg_bold[blue]%}%c%f"
-local timer_show=0
-local min_show_time=3
+
 
 ZSH_THEME_GIT_PROMPT_PREFIX="%{$fg[white]%}"
 ZSH_THEME_GIT_PROMPT_SUFFIX="%f "
@@ -23,19 +22,21 @@ ZSH_THEME_GIT_PROMPT_CLEAN=" %{$fg_bold[green]%}✔"
 PROMPT='$prefix $dir $(git_prompt_info)'
 RPROMPT='%{$fg_bold[white]%}[%*]%f'
 
+# $SECONDS =>  whole seconds the shell has been running
+# $exeute_time => the sceonds when execute (or enter)
+# $elapsed_time => show elapsed time, default to be 0
+
+local elapsed_time=0
+
 function preexec() {
-  timer=${timer:-$SECONDS}
+  execute_time=${execute_time:-$SECONDS}
 }
 
 function precmd() {
-  if [ $timer ]; then
-    timer_show=$(($SECONDS - $timer))
-    if [[ $timer_show -ge $min_show_time ]]; then
-      RPROMPT='%{$fg_bold[red]%}(${timer_show}s)%f%{$fg_bold[white]%}[%*]%f'
-    else
-      RPROMPT='%{$fg_bold[white]%}[%*]%f'
-    fi
-    unset timer
+  if [ $execute_time ]; then
+    elapsed_time=$(($SECONDS - $execute_time))
+    RPROMPT='%{$fg_bold[red]%}(${elapsed_time}s)%f%{$fg_bold[white]%}[%*]%f'
+    unset execute_time
   fi
 }
 
