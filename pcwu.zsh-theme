@@ -10,6 +10,12 @@
 # %n => username
 # %m => shortname host
 
+function is_ssh() {
+  if [[ -n $SSH_CONNECTION ]]; then
+    echo "%{$fg_bold[red]%}(ssh)"
+  fi
+}
+
 local prefix="%{$fg_bold[white]%}▲"
 local dir="%{$fg_bold[blue]%}%c%f"
 
@@ -19,7 +25,9 @@ ZSH_THEME_GIT_PROMPT_SUFFIX="%f "
 ZSH_THEME_GIT_PROMPT_DIRTY=" %{$fg[red]%}✖"
 ZSH_THEME_GIT_PROMPT_CLEAN=" %{$fg_bold[green]%}✔"
 
-PROMPT='$prefix $dir $(git_prompt_info)'
+# PROMPT='$prefix $dir $(git_prompt_info)'
+# add (ssh) in prompt if ssh connected
+PROMPT='${prefix}$(is_ssh) ${dir} $(git_prompt_info)'
 RPROMPT='%{$fg_bold[white]%}[%*]%f'
 
 # $SECONDS =>  whole seconds the shell has been running
@@ -40,6 +48,15 @@ function precmd() {
   fi
 }
 
+
 autoload -Uz add-zsh-hook
 add-zsh-hook preexec preexec
 add-zsh-hook precmd precmd
+
+# immediately update the time stamp if hit enter in terminal
+# https://stackoverflow.com/a/35051172/6710360
+function _reset-prompt-and-accept-line {
+  zle reset-prompt
+  zle .accept-line     # Note the . meaning the built-in accept-line.
+}
+zle -N accept-line _reset-prompt-and-accept-line
